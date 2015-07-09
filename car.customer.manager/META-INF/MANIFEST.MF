@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: carmanager
+Bundle-SymbolicName: car.customer.manager;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: car.manager.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: lib/commons-lang.jar,
+ lib/commons-logging.jar,
+ lib/h2-1.3.164.jar,
+ lib/log4j.jar,
+ lib/stp-common.jar,
+ lib/stp-studio-sim.jar,
+ .
