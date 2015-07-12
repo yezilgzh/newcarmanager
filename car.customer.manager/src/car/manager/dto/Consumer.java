@@ -1,80 +1,105 @@
 package car.manager.dto;
 
-/**
- * 消费记录对象
- * 
- * @author root
- * 
- */
-public class Consumer {
-	private String id;
-	// 车牌
-	private String carno = "";
-	// 车主姓名
-	private String name = "";
-	// 车型
-	private String cartype = "";
-	// 颜色
-	private String color = "";
-	// 手机号
-	private String phone = "";
-	// 备注
-	private String remark = "";
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
-	public String getId() {
-		return id;
-	}
+public class Consumer
+{
+  private String id;
+  private String carno = "";
 
-	public void setId(String id) {
-		this.id = id;
-	}
+  private String name = "";
 
-	public String getCarno() {
-		return carno;
-	}
+  private String cartype = "";
 
-	public void setCarno(String carno) {
-		this.carno = carno;
-	}
+  private String color = "";
 
-	public String getName() {
-		return name;
-	}
+  private String phone = "";
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  private String remark = "";
 
-	public String getCartype() {
-		return cartype;
-	}
+  private int sex = 0;
+  private Date createTime;
+  private List<InStoreRecord> instoreRecords = new LinkedList();
 
-	public void setCartype(String cartype) {
-		this.cartype = cartype;
-	}
+  public String getId() {
+    return this.id;
+  }
 
-	public String getColor() {
-		return color;
-	}
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	public void setColor(String color) {
-		this.color = color;
-	}
+  public String getCarno() {
+    return this.carno;
+  }
 
-	public String getPhone() {
-		return phone;
-	}
+  public void setCarno(String carno) {
+    this.carno = carno;
+  }
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
+  public String getName() {
+    return this.name;
+  }
 
-	public String getRemark() {
-		return remark;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public void setRemark(String remark) {
-		this.remark = remark;
-	}
+  public String getCartype() {
+    return this.cartype;
+  }
 
+  public void setCartype(String cartype) {
+    this.cartype = cartype;
+  }
+
+  public String getColor() {
+    return this.color;
+  }
+
+  public void setColor(String color) {
+    this.color = color;
+  }
+
+  public String getPhone() {
+    return this.phone;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
+
+  public String getRemark() {
+    return this.remark;
+  }
+
+  public void setRemark(String remark) {
+    this.remark = remark;
+  }
+
+  public List<InStoreRecord> getInstoreRecords() {
+    return this.instoreRecords;
+  }
+
+  public void setInstoreRecords(List<InStoreRecord> instoreRecords) {
+    this.instoreRecords = instoreRecords;
+  }
+
+  public int getSex() {
+    return this.sex;
+  }
+
+  public void setSex(int sex) {
+    this.sex = sex;
+  }
+
+  public Date getCreateTime() {
+    return this.createTime;
+  }
+
+  public void setCreateTime(Date createTime) {
+    this.createTime = createTime;
+  }
 }

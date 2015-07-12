@@ -6,7 +6,8 @@
          id="application"
          point="org.eclipse.core.runtime.applications">
       <application
-            icon="icons/ac_login.png">
+            icon="icons/car.png"
+            visible="true">
          <run
                class="car.manager.Application">
          </run>
@@ -29,10 +30,40 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="car.manager.viewpart.CustomerManagerViewPart"
+            class="car.manager.viewpart.TodayInStoreViewPart"
             icon="icons/ac_ts.png"
             id="car.customer.manager.customerview"
-            name="消费记录"
+            name="当日消费记录"
+            restorable="true">
+      </view>
+      <view
+            class="car.manager.viewpart.UserRecordsQueryViewPart"
+            icon="icons/query.png"
+            id="car.customer.manager.query"
+            name="用户消费记录"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="true"
+            class="car.manager.viewpart.InStoreRecordViewPart"
+            icon="icons/record.png"
+            id="car.customer.manager.historyrecord"
+            name="进店记录"
+            restorable="true">
+      </view>
+      <view
+            class="car.manager.viewpart.UserManagerViewPart"
+            icon="icons/user.png"
+            id="car.customer.manager.usermanager"
+            name="用户管理"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="true"
+            class="car.manager.viewpart.HistoryRecordQueryViewPart"
+            icon="icons/history.png"
+            id="car.customer.manager.historyquery"
+            name="历史消费记录"
             restorable="true">
       </view>
    </extension>
@@ -63,8 +94,39 @@
                   style="push">
             </command>
             <command
+                  commandId="com.retailmanager.carquery"
+                  icon="icons/query.png"
+                  id="query"
+                  label="用户查询"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.retailmanager.usermanager"
+                  icon="icons/user.png"
+                  id="usermanager"
+                  label="用户管理"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.retailmanager.historyrecord"
+                  icon="icons/history.png"
+                  id="historyrecord"
+                  label="历史记录"
+                  style="push">
+            </command>
+            <command
                   commandId="org.eclipse.ui.file.exit"
                   label="退出系统">
+            </command>
+         </menu>
+         <menu
+               label="维护配置">
+            <command
+                  commandId="com.retailmanager.preference"
+                  icon="icons/setup.png"
+                  id="preference"
+                  label="维护配置"
+                  style="push">
             </command>
          </menu>
       </menuContribution>
@@ -80,7 +142,28 @@
                   label="消费记录"
                   style="push">
             </command>
-         </toolbar>
+   
+            <command
+                  commandId="com.retailmanager.carquery"
+                  icon="icons/query.png"
+                  id="query"
+                  label="用户查询"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.retailmanager.usermanager"
+                  icon="icons/user.png"
+                  id="usermanager"
+                  label="用户管理"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.retailmanager.historyrecord"
+                  icon="icons/history.png"
+                  id="historyrecord"
+                  label="历史记录"
+                  style="push">
+            </command>      </toolbar>
       </menuContribution>
    </extension>
    <extension
@@ -89,12 +172,44 @@
             class="car.handler.ShowDetaiHandler"
             commandId="com.retailmanager.detail">
       </handler>
+      <handler
+            class="car.handler.ShowQueryHandler"
+            commandId="com.retailmanager.carquery">
+      </handler>
+      <handler
+            class="car.handler.SystemConfigurationHandler"
+            commandId="com.retailmanager.preference">
+      </handler>
+      <handler
+            class="car.handler.UserManagerHandler"
+            commandId="com.retailmanager.usermanager">
+      </handler>
+      <handler
+            class="car.handler.HistoryRecordHandler"
+            commandId="com.retailmanager.historyrecord">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             id="com.retailmanager.detail"
             name="detail">
+      </command>
+      <command
+            id="com.retailmanager.carquery"
+            name="carquery">
+      </command>
+      <command
+            id="com.retailmanager.preference"
+            name="preference">
+      </command>
+      <command
+            id="com.retailmanager.usermanager"
+            name="usermanager">
+      </command>
+      <command
+            id="com.retailmanager.historyrecord"
+            name="historyrecord">
       </command>
    </extension>
    <extension
@@ -107,7 +222,29 @@
                name="appName"
                value="carmanager">
          </property>
+         <property
+               name="windowImages"
+               value="icons/ic_directions_car_48px-16.png,icons/ic_directions_car_48px-32.png,icons/ic_directions_car_48px-48.png,icons/ic_directions_car_48px-64 (1).png">
+         </property>
       </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="car.customer.manager.page.CarColorPreferencePage"
+            id="car.customer.manager.colorpage"
+            name="颜色维护">
+      </page>
+      <page
+            class="car.customer.manager.page.ProjectItemPreferencePage"
+            id="car.customer.manager.projectitempage"
+            name="项目维护">
+      </page>
+      <page
+            class="car.customer.manager.page.CarTypePreferencePage"
+            id="car.customer.manager.cartypepage"
+            name="车型维护">
+      </page>
    </extension>
 
 </plugin>

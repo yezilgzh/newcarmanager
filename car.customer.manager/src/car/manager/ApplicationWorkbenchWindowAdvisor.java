@@ -2,75 +2,74 @@ package car.manager;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
 import org.h2.tools.Server;
 
-public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
-	Logger log = Logger.getLogger(getClass());
+public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor
+{
+  Logger log = Logger.getLogger(getClass());
 
-	public ApplicationWorkbenchWindowAdvisor(
-			IWorkbenchWindowConfigurer configurer) {
-		super(configurer);
-	}
+  public ApplicationWorkbenchWindowAdvisor(IWorkbenchWindowConfigurer configurer)
+  {
+    super(configurer);
+  }
 
-	public ActionBarAdvisor createActionBarAdvisor(
-			IActionBarConfigurer configurer) {
-		return new ApplicationActionBarAdvisor(configurer);
-	}
+  public ActionBarAdvisor createActionBarAdvisor(IActionBarConfigurer configurer)
+  {
+    return new ApplicationActionBarAdvisor(configurer);
+  }
 
-	public void preWindowOpen() {
-		opendbServer();
-		IWorkbenchWindowConfigurer configurer = getWindowConfigurer();
-		configurer.setShellStyle(SWT.MIN | SWT.MAX);
-		configurer.setShowCoolBar(true);
-		configurer.setShowStatusLine(false);
-		configurer.setTitle("æ•£æˆ·ç®¡ç†ç³»ç»Ÿ");
-	}
+  public void preWindowOpen() {
+    opendbServer();
+    IWorkbenchWindowConfigurer configurer = getWindowConfigurer();
+    configurer.setShellStyle(1152);
+    configurer.setShowCoolBar(true);
+    configurer.setShowStatusLine(false);
+    configurer.setTitle("É¢»§¹ÜÀíÏµÍ³");
+  }
 
-	/**
-	 * å¯åŠ¨æ•°æ®åº“æœåŠ¡å™¨
-	 */
-	private void opendbServer() {
-		try {
-			Driver.load(ApplicationWorkbenchWindowAdvisor.class);
-			startH2Server();
-			log.info("ç³»ç»Ÿåˆå§‹åŒ–æˆåŠŸ");
-		} catch (Throwable e) {
-			log.error("ç³»ç»Ÿåˆå§‹åŒ–å¤±è´¥", e);
-		}
-	}
+  private void opendbServer()
+  {
+    try
+    {
+      Driver.load(ApplicationWorkbenchWindowAdvisor.class);
+      startH2Server();
+      this.log.info("ÏµÍ³³õÊ¼»¯³É¹¦");
+    } catch (Throwable e) {
+      this.log.error("ÏµÍ³³õÊ¼»¯Ê§°Ü", e);
+    }
+  }
 
-	/**
-	 * å¯åŠ¨æ•°æ®åº“æœåŠ¡å™¨
-	 */
-	private void startH2Server() {
-		int count = 10;// æ€»å°è¯•æ¬¡æ•°
-		for (int i = 0; i < count; i++) {
-			try {
-				Server server = Server.createTcpServer(new String[] { "-tcp",
-						"-tcpPort", "9093", "-tcpAllowOthers" });
-				server.start();
-				log.info("H2æ•°æ®åº“å¯åŠ¨æˆåŠŸ[å¤±è´¥æ¬¡æ•°=" + i + "]");
-				return;
-			} catch (Throwable e) {
-				log.error("H2æ•°æ®åº“å¯åŠ¨å¤±è´¥[å¤±è´¥æ¬¡æ•°=" + (i + 1) + "]", e);
-				try {
-					if (i == count - 1) {// æœ€åä¸€æ¬¡ï¼Œä¸å†ç¡ï¼Œç›´æ¥break
-						break;
-					}
-					Thread.sleep(2000);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
+  private void startH2Server()
+  {
+    int count = 10;
+    for (int i = 0; i < count; ) {
+      try {
+        Server server = Server.createTcpServer(new String[] { "-tcp", 
+          "-tcpPort", "9093", "-tcpAllowOthers" });
+        server.start();
+        this.log.info("H2Êı¾İ¿âÆô¶¯³É¹¦[Ê§°Ü´ÎÊı=" + i + "]");
+        return;
+      } catch (Throwable e) {
+        this.log.error("H2Êı¾İ¿âÆô¶¯Ê§°Ü[Ê§°Ü´ÎÊı=" + (i + 1) + "]", e);
+        try {
+          if (i == count - 1) {
+            break;
+          }
+          Thread.sleep(2000L);
+        } catch (InterruptedException e1) {
+          e1.printStackTrace();
+        }
+        i++;
+      }
 
-		MessageDialog.openError(getWindowConfigurer().getWindow().getShell(),
-				"æç¤ºä¿¡æ¯", "æ•°æ®åº“å¯åŠ¨å¤±è´¥ï¼Œè¯·æ£€æŸ¥9093ç«¯å£æ˜¯å¦è¢«å ç”¨ï¼");
-		System.exit(0);
-	}
+    }
+
+    MessageDialog.openError(getWindowConfigurer().getWindow().getShell(), 
+      "ÌáÊ¾ĞÅÏ¢", "Êı¾İ¿âÆô¶¯Ê§°Ü£¬Çë¼ì²é9093¶Ë¿ÚÊÇ·ñ±»Õ¼ÓÃ£¡");
+    System.exit(0);
+  }
 }

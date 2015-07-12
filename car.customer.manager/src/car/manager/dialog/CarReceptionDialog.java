@@ -3,21 +3,23 @@ package car.manager.dialog;
 import java.util.LinkedList;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -26,29 +28,25 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import car.manager.IAfter;
+import car.manager.Activator;
+import car.manager.dao.ColorDao;
 import car.manager.dao.ConsumerDao;
 import car.manager.dto.Consumer;
 import car.manager.dto.CostProject;
 import car.manager.dto.InStoreRecord;
 import car.manager.dto.control.DataCache;
+import car.manager.lsn.IAfter;
+import car.manager.lsn.ListenerManager;
 import car.manager.util.StringUtil;
 
-/**
- * ÔøΩ¬≥ÔøΩÔøΩ”¥ÔøΩ‘ªÔøΩÔøΩÔøΩ
- * 
- * @author root
- * 
- */
 public class CarReceptionDialog extends Dialog {
 	private Table table;
 	private Text text_carno;
 	private Text text_name;
-	private Text text_color;
 	private Text text_phone;
-	private ConsumerDao consumerDao = new ConsumerDao();
 	private Group group_consumer;
 	private Consumer cs;
 	private Text text_type;
@@ -60,274 +58,364 @@ public class CarReceptionDialog extends Dialog {
 	private Label label_exist;
 	private InStoreRecord isr;
 	private Composite main;
+	private Button btn_man;
+	private Button btn_woman;
+	private Combo combo_color;
+	private Button btn_addColor;
+	private Consumer consumer;
+	private Group group_carno;
+	private Button btn_history;
 
 	public CarReceptionDialog(Shell parentShell, IAfter<InStoreRecord> operate) {
 		super(parentShell);
 		this.operate = operate;
 	}
 
-	public CarReceptionDialog(Shell parentShell, IAfter<InStoreRecord> operate,
-			InStoreRecord isr) {
-		super(parentShell);
-		this.operate = operate;
-		this.isr = isr;
-	}
-
-	@Override
-	protected Control createDialogArea(final Composite parent) {
-		if (isr == null)
-			parent.getShell().setText("Êñ∞ËΩ¶Êé•ÂæÖ");
+	protected Control createDialogArea(Composite parent) {
+		if (this.isr == null)
+			parent.getShell().setText("–¬≥µΩ”¥˝");
 		else
-			parent.getShell().setText("ËÆ¢ÂçïËØ¶ÊÉÖ");
-		main = (Composite) super.createDialogArea(parent);
-		label_exist = new Label(main, SWT.NONE);
-		label_exist.setVisible(false);
-		label_exist.setText("ÂÆ¢Êà∑Â∑≤Â≠òÂú®");
-		label_exist.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false,
+			parent.getShell().setText("∂©µ•œÍ«È");
+		parent.getShell()
+				.setImage(
+						Activator
+								.getImage("platform:/plugin/car.customer.manager/icons/car.png"));
+		this.main = ((Composite) super.createDialogArea(parent));
+		GridLayout gridLayout = (GridLayout) this.main.getLayout();
+		this.label_exist = new Label(this.main, 0);
+		this.label_exist.setVisible(false);
+		this.label_exist.setText("øÕªß“—¥Ê‘⁄");
+		this.label_exist.setLayoutData(new GridData(16777216, 16777216, false,
 				false, 1, 1));
-		label_exist.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
+		this.label_exist.setForeground(SWTResourceManager.getColor(3));
 
-		Group group = new Group(main, SWT.NONE);
-		group.setText("\u8F66\u724C\u4FE1\u606F");
-		group.setLayout(new GridLayout(2, false));
-		group.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1,
+		this.group_carno = new Group(this.main, 0);
+		this.group_carno.setText("≥µ≈∆–≈œ¢");
+		this.group_carno.setLayout(new GridLayout(3, false));
+		this.group_carno.setLayoutData(new GridData(4, 16777216, true, false,
+				1, 1));
+
+		Label lblNewLabel = new Label(this.group_carno, 0);
+		lblNewLabel.setLayoutData(new GridData(131072, 16777216, false, false,
+				1, 1));
+		lblNewLabel.setText("≥µ≈∆∫≈");
+
+		this.text_carno = new Text(this.group_carno, 2048);
+		this.text_carno.setLayoutData(new GridData(4, 16777216, true, false, 1,
 				1));
 
-		Label lblNewLabel = new Label(group, SWT.NONE);
-		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
-				false, 1, 1));
-		lblNewLabel.setText("\u8F66\u724C\u53F7");
-
-		text_carno = new Text(group, SWT.BORDER);
-		text_carno.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
-
-		group_consumer = new Group(main, SWT.NONE);
-		group_consumer.setText("\u5BA2\u6237\u4FE1\u606F");
-		group_consumer.setLayout(new GridLayout(4, false));
-		GridData gd_group_1 = new GridData(SWT.FILL, SWT.CENTER, false, false,
-				1, 1);
+		this.btn_history = new Button(this.group_carno, 0);
+		this.btn_history.setText("±£—¯º«¬º");
+		this.btn_history.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String carno = CarReceptionDialog.this.text_carno.getText()
+						.trim();
+				ConsumerDao cdao = DataCache.getInstance().getService()
+						.getConsumerDao();
+				Consumer cs = cdao.get(carno);
+				if (cs == null) {
+					MessageDialog.openInformation(
+							CarReceptionDialog.this.getShell(), "Ã· æ–≈œ¢", "["
+									+ carno + "]Œ™ ◊¥ŒµΩµÍ£¨Œ¥’“µΩ∂‘”¶µƒΩ¯µÍº«¬º£°");
+					return;
+				}
+				new HistoryRecordDialog(CarReceptionDialog.this.getShell(),
+						carno).open();
+			}
+		});
+		this.group_consumer = new Group(this.main, 0);
+		this.group_consumer.setText("øÕªß–≈œ¢");
+		this.group_consumer.setLayout(new GridLayout(5, false));
+		GridData gd_group_1 = new GridData(4, 16777216, false, false, 1, 1);
 		gd_group_1.heightHint = 95;
-		group_consumer.setLayoutData(gd_group_1);
+		this.group_consumer.setLayoutData(gd_group_1);
 
-		Label lblNewLabel_1 = new Label(group_consumer, SWT.NONE);
-		lblNewLabel_1.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
+		Label lblNewLabel_1 = new Label(this.group_consumer, 0);
+		lblNewLabel_1.setLayoutData(new GridData(131072, 16777216, false,
 				false, 1, 1));
-		lblNewLabel_1.setText("\u5BA2\u6237\u59D3\u540D");
+		lblNewLabel_1.setText("øÕªß–’√˚");
 
-		text_name = new Text(group_consumer, SWT.BORDER);
-		text_name.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
+		this.text_name = new Text(this.group_consumer, 2048);
+		this.text_name.setLayoutData(new GridData(4, 16777216, true, false, 1,
+				1));
+
+		Label lblNewLabel_2 = new Label(this.group_consumer, 0);
+		lblNewLabel_2.setLayoutData(new GridData(131072, 16777216, false,
+				false, 1, 1));
+		lblNewLabel_2.setText(" ÷ª˙∫≈");
+
+		this.text_phone = new Text(this.group_consumer, 2048);
+		this.text_phone.setLayoutData(new GridData(4, 16777216, true, false, 1,
+				1));
+		new Label(this.group_consumer, 0);
+
+		Label lblNewLabel_7 = new Label(this.group_consumer, 0);
+		lblNewLabel_7.setLayoutData(new GridData(131072, 16777216, false,
+				false, 1, 1));
+		lblNewLabel_7.setText("≥µ–Õ");
+
+		this.text_type = new Text(this.group_consumer, 2048);
+		this.text_type.setLayoutData(new GridData(4, 16777216, true, false, 1,
+				1));
+
+		Label lblNewLabel_3 = new Label(this.group_consumer, 0);
+		lblNewLabel_3.setLayoutData(new GridData(131072, 16777216, false,
+				false, 1, 1));
+		lblNewLabel_3.setText("—’…´");
+
+		this.combo_color = new Combo(this.group_consumer, 0);
+		this.combo_color.setLayoutData(new GridData(4, 16777216, true, false,
 				1, 1));
+		this.combo_color.setItems(DataCache.getInstance().getColorDao().get());
+		this.combo_color.setText("");
+		this.btn_addColor = new Button(this.group_consumer, 0);
+		GridData gd_btnNewButton = new GridData(16384, 16777216, false, false,
+				1, 1);
+		gd_btnNewButton.widthHint = 38;
+		this.btn_addColor.setLayoutData(gd_btnNewButton);
+		this.btn_addColor.setImage(ResourceManager.getPluginImage(
+				"car.customer.manager", "icons/add.png"));
+		this.btn_addColor.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				String color = CarReceptionDialog.this.combo_color.getText()
+						.trim();
+				ColorDao dao = DataCache.getInstance().getColorDao();
+				try {
+					dao.insert(color);
+				} catch (Exception e1) {
+					MessageDialog.openError(getShell(), "Ã· æ–≈œ¢", color
+							+ "ø…ƒ‹“—¥Ê‘⁄£¨«ÎºÏ≤È");
+					return;
+				}
+				MessageDialog.openInformation(getShell(), "Ã· æ–≈œ¢", color
+						+ "ÃÌº”≥…π¶£°");
+			}
 
-		Label lblNewLabel_2 = new Label(group_consumer, SWT.NONE);
-		lblNewLabel_2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		Label lblNewLabel_4 = new Label(this.group_consumer, 0);
+		lblNewLabel_4.setLayoutData(new GridData(131072, 16777216, false,
 				false, 1, 1));
-		lblNewLabel_2.setText("\u624B\u673A\u53F7");
+		lblNewLabel_4.setText("–‘±");
 
-		text_phone = new Text(group_consumer, SWT.BORDER);
-		text_phone.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
+		Composite composite_1 = new Composite(this.group_consumer, 0);
+		composite_1.setLayout(new GridLayout(2, false));
+		GridData gd_composite_1 = new GridData(4, 16777216, false, false, 1, 1);
+		gd_composite_1.heightHint = 23;
+		composite_1.setLayoutData(gd_composite_1);
 
-		Label lblNewLabel_7 = new Label(group_consumer, SWT.NONE);
-		lblNewLabel_7.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
-				false, 1, 1));
-		lblNewLabel_7.setText("ËΩ¶Âûã");
+		this.btn_man = new Button(composite_1, 16);
+		this.btn_man.setSelection(true);
+		this.btn_man.setText("ƒ–");
 
-		text_type = new Text(group_consumer, SWT.BORDER);
-		text_type.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
-				1, 1));
+		this.btn_woman = new Button(composite_1, 16);
+		this.btn_woman.setText("≈Æ");
+		new Label(this.group_consumer, 0);
+		new Label(this.group_consumer, 0);
+		new Label(this.group_consumer, 0);
 
-		Label lblNewLabel_3 = new Label(group_consumer, SWT.NONE);
-		lblNewLabel_3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
-				false, 1, 1));
-		lblNewLabel_3.setText("\u989C\u8272");
-
-		text_color = new Text(group_consumer, SWT.BORDER);
-		text_color.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
-
-		Group group_2 = new Group(main, SWT.NONE);
-		group_2.setText("\u4FDD\u517B\u9879\u76EE");
+		Group group_2 = new Group(this.main, 0);
+		group_2.setText("±£—¯œÓƒø");
 		group_2.setLayout(new GridLayout(2, false));
-		group_2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		group_2.setLayoutData(new GridData(4, 4, true, true, 1, 1));
 
-		tableViewer = new TableViewer(group_2, SWT.BORDER | SWT.FULL_SELECTION);
-		table = tableViewer.getTable();
-		GridData gd_table = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
+		this.tableViewer = new TableViewer(group_2, 67584);
+		this.table = this.tableViewer.getTable();
+		GridData gd_table = new GridData(4, 4, false, true, 1, 1);
 		gd_table.widthHint = 525;
-		table.setLayoutData(gd_table);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
+		this.table.setLayoutData(gd_table);
+		this.table.setLinesVisible(true);
+		this.table.setHeaderVisible(true);
 
 		TableViewerColumn tableViewerColumn = new TableViewerColumn(
-				tableViewer, SWT.NONE);
+				this.tableViewer, 0);
 		TableColumn tblclmnNewColumn = tableViewerColumn.getColumn();
 		tblclmnNewColumn.setWidth(151);
-		tblclmnNewColumn.setText("\u9879\u76EE\u540D\u79F0");
+		tblclmnNewColumn.setText("œÓƒø√˚≥∆");
 
 		TableViewerColumn tableViewerColumn_1 = new TableViewerColumn(
-				tableViewer, SWT.NONE);
+				this.tableViewer, 0);
 		TableColumn tblclmnNewColumn_1 = tableViewerColumn_1.getColumn();
 		tblclmnNewColumn_1.setWidth(184);
-		tblclmnNewColumn_1.setText("\u8D39\u7528");
+		tblclmnNewColumn_1.setText("∑—”√");
 
 		TableViewerColumn tableViewerColumn_2 = new TableViewerColumn(
-				tableViewer, SWT.NONE);
+				this.tableViewer, 0);
 		TableColumn tblclmnNewColumn_2 = tableViewerColumn_2.getColumn();
 		tblclmnNewColumn_2.setWidth(193);
-		tblclmnNewColumn_2.setText("\u5907\u6CE8");
+		tblclmnNewColumn_2.setText("±∏◊¢");
 
-		Composite composite = new Composite(group_2, SWT.NONE);
+		Composite composite = new Composite(group_2, 0);
 		composite.setLayout(new GridLayout(1, false));
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
-				1, 1));
-		new Label(composite, SWT.NONE);
+		composite.setLayoutData(new GridData(4, 4, true, false, 1, 1));
+		new Label(composite, 0);
 
-		btn_addProject = new Button(composite, SWT.NONE);
-		btn_addProject.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+		this.btn_addProject = new Button(composite, 0);
+		this.btn_addProject.setLayoutData(new GridData(4, 16777216, true,
 				false, 1, 1));
-		btn_addProject.setText("\u589E\u52A0");
-		btn_addProject.addSelectionListener(new SelectionAdapter() {
-			@Override
+		this.btn_addProject.setText("‘ˆº”");
+		this.btn_addProject.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				new ProjectItemDialog(parent.getShell(),
-						new IAfter<CostProject>() {
-							@Override
-							public void afterOperate(CostProject t) {
-								costItems.add(t);
-								tableViewer.setInput(costItems);
-								int account = 0;
-								for (CostProject c : costItems) {
-									account += c.getCost();
-								}
-								label_account.setText(String.valueOf(account));
-								tableViewer.refresh();
-
-							}
-						}).open();
+				new ProjectItemDialog(getShell(), new IAfter<CostProject>() {
+					public void afterOperate(CostProject t) {
+						CarReceptionDialog.this.costItems.add(t);
+						CarReceptionDialog.this.tableViewer
+								.setInput(CarReceptionDialog.this.costItems);
+						int account = 0;
+						for (CostProject c : CarReceptionDialog.this.costItems) {
+							account += c.getCost();
+						}
+						CarReceptionDialog.this.label_account.setText(String
+								.valueOf(account));
+						CarReceptionDialog.this.tableViewer.refresh();
+					}
+				}).open();
 			}
 		});
+		new Label(composite, 0);
 
-		new Label(composite, SWT.NONE);
-
-		Button btnNewButton_1 = new Button(composite, SWT.NONE);
-		btnNewButton_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
-				false, 1, 1));
-		btnNewButton_1.setText("\u5220\u9664");
-
-		Group group_3 = new Group(main, SWT.NONE);
-		group_3.setLayout(new GridLayout(2, false));
-		group_3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1,
+		Button btnNewButton_1 = new Button(composite, 0);
+		btnNewButton_1.setLayoutData(new GridData(4, 16777216, false, false, 1,
 				1));
+		btnNewButton_1.setText("…æ≥˝");
 
-		Label lblNewLabel_5 = new Label(group_3, SWT.NONE);
-		lblNewLabel_5.setFont(SWTResourceManager.getFont("Œ¢ÔøΩÔøΩÔøΩ≈∫ÔøΩ", 15,
-				SWT.NORMAL));
-		lblNewLabel_5.setText("\u8D39\u7528\u603B\u8BA1");
-		label_account = new Label(group_3, SWT.NONE);
-		label_account.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
-		label_account.setAlignment(SWT.RIGHT);
-		GridData gd_label_account = new GridData(SWT.LEFT, SWT.CENTER, false,
-				false, 1, 1);
+		Group group_3 = new Group(this.main, 0);
+		group_3.setLayout(new GridLayout(2, false));
+		group_3.setLayoutData(new GridData(4, 4, true, false, 1, 1));
+
+		Label lblNewLabel_5 = new Label(group_3, 0);
+		lblNewLabel_5.setFont(SWTResourceManager.getFont("Œ¢»Ì—≈∫⁄", 15, 0));
+		lblNewLabel_5.setText("∑—”√◊‹º∆");
+		this.label_account = new Label(group_3, 0);
+		this.label_account.setFont(SWTResourceManager.getFont("Œ¢»Ì—≈∫⁄", 15, 0));
+		this.label_account.setForeground(SWTResourceManager.getColor(3));
+		this.label_account.setAlignment(131072);
+		GridData gd_label_account = new GridData(16384, 16777216, false, false,
+				1, 1);
 		gd_label_account.widthHint = 92;
-		label_account.setLayoutData(gd_label_account);
-		label_account.setFont(SWTResourceManager.getFont("Œ¢ÔøΩÔøΩÔøΩ≈∫ÔøΩ", 15,
-				SWT.NORMAL));
-		text_carno.addFocusListener(new FocusAdapter() {
-			@Override
+		this.label_account.setLayoutData(gd_label_account);
+		this.text_carno.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-				String carno = text_carno.getText().trim();
-				cs = consumerDao.get(carno);
-				if (cs != null) {
-					text_name.setText(StringUtil.filterNull(cs.getName()));
-					text_phone.setText(StringUtil.filterNull(cs.getPhone()));
-					text_color.setText(StringUtil.filterNull(cs.getColor()));
-					text_type.setText(StringUtil.filterNull(cs.getCartype()));
-					label_exist.setVisible(true);
-				} else {
+				String carno = CarReceptionDialog.this.text_carno.getText()
+						.trim().toUpperCase();
+				CarReceptionDialog.this.cs = DataCache.getInstance()
+						.getService().getConsumerDao().get(carno);
+				if (CarReceptionDialog.this.cs != null) {
+					CarReceptionDialog.this.text_name.setText(StringUtil
+							.filterNull(CarReceptionDialog.this.cs.getName()));
+					CarReceptionDialog.this.text_phone.setText(StringUtil
+							.filterNull(CarReceptionDialog.this.cs.getPhone()));
+					CarReceptionDialog.this.combo_color.setText(StringUtil
+							.filterNull(CarReceptionDialog.this.cs.getColor()));
+					CarReceptionDialog.this.text_type.setText(StringUtil
+							.filterNull(CarReceptionDialog.this.cs.getCartype()));
+					CarReceptionDialog.this.label_exist.setVisible(true);
 				}
 
+				CarReceptionDialog.this.text_carno.setText(carno);
 			}
 		});
-
-		tableViewer.setContentProvider(new ArrayContentProvider());
-		tableViewer.setLabelProvider(new CostItemsLabelProvider());
-		tableViewer.setInput(costItems);
-		tableViewer.refresh();
+		this.tableViewer.setContentProvider(new ArrayContentProvider());
+		this.tableViewer.setLabelProvider(new CostItemsLabelProvider());
+		this.tableViewer.setInput(this.costItems);
+		this.tableViewer.refresh();
 		init();
-		return main;
+		return this.main;
 	}
 
 	private void init() {
-		if (isr != null) {
-			text_carno.setText(isr.getConsumer().getCarno());
-			text_name.setText(StringUtil
-					.filterNull(isr.getConsumer().getName()));
-			text_phone.setText(StringUtil.filterNull(isr.getConsumer()
-					.getPhone()));
-			text_color.setText(StringUtil.filterNull(isr.getConsumer()
-					.getColor()));
-			text_type.setText(StringUtil.filterNull(isr.getConsumer()
+		if (this.isr != null) {
+			this.text_carno.setText(this.isr.getConsumer().getCarno());
+			this.text_name.setText(StringUtil.filterNull(this.isr.getConsumer()
+					.getName()));
+			this.text_phone.setText(StringUtil.filterNull(this.isr
+					.getConsumer().getPhone()));
+			this.combo_color.setText(StringUtil.filterNull(this.isr
+					.getConsumer().getColor()));
+			this.text_type.setText(StringUtil.filterNull(this.isr.getConsumer()
 					.getCartype()));
-			tableViewer.setInput(isr.getCostProjects());
-			tableViewer.refresh();
-			main.setEnabled(false);
+			boolean sex = this.isr.getConsumer().getSex() == 0;
+			this.btn_man.setSelection(sex);
+			this.btn_woman.setSelection(!sex);
+			this.tableViewer.setInput(this.isr.getCostProjects());
+			this.tableViewer.refresh();
+			this.main.setEnabled(false);
+			int totalCost = 0;
+			for (CostProject cp : this.isr.getCostProjects()) {
+				totalCost += cp.getCost();
+			}
+			this.label_account.setText(String.valueOf(totalCost));
 		}
 
+		if (this.consumer != null) {
+			this.text_carno.setText(this.consumer.getCarno());
+			this.text_name.setText(StringUtil.filterNull(this.consumer
+					.getName()));
+			this.text_phone.setText(StringUtil.filterNull(this.consumer
+					.getPhone()));
+			this.combo_color.setText(StringUtil.filterNull(this.consumer
+					.getColor()));
+			this.text_type.setText(StringUtil.filterNull(this.consumer
+					.getCartype()));
+			boolean sex = this.consumer.getSex() == 0;
+			this.btn_man.setSelection(sex);
+			this.btn_woman.setSelection(!sex);
+			this.group_consumer.setEnabled(false);
+			this.group_carno.setEnabled(false);
+		}
 	}
 
-	@Override
 	protected void okPressed() {
-		if (isr != null) {
+		if (this.isr != null) {
 			super.okPressed();
 			return;
 		}
 		InStoreRecord isr = new InStoreRecord();
 		isr.setRemark("");
-		String carNo = text_carno.getText().trim();
-		if (cs == null) {
-			cs = new Consumer();
-			cs.setCarno(carNo);
-			cs.setName(text_name.getText().trim());
-			cs.setPhone(text_phone.getText().trim());
-			cs.setCartype(text_type.getText().trim());
-			cs.setColor(text_color.getText().trim());
+		String carNo = this.text_carno.getText().trim();
+		if (this.cs == null) {
+			this.cs = new Consumer();
+			this.cs.setCarno(carNo);
+			this.cs.setName(this.text_name.getText().trim());
+			this.cs.setPhone(this.text_phone.getText().trim());
+			this.cs.setCartype(this.text_type.getText().trim());
+			this.cs.setColor(this.combo_color.getText().trim());
+			this.cs.setSex(this.btn_man.getSelection() ? 0 : 1);
 		}
-		isr.setConsumer(cs);
-		isr.setCostProjects(costItems);
+		isr.setConsumer(this.cs);
+		isr.setCostProjects(this.costItems);
 		DataCache.getInstance().getService().insert(isr);
-		operate.afterOperate(isr);
+		this.operate.afterOperate(isr);
+		ListenerManager.fireListener("car.customer.manager.customerview");
 		super.okPressed();
 	}
 
-	@Override
 	protected Point getInitialSize() {
 		return new Point(670, 720);
 	}
 
 	class CostItemsLabelProvider extends LabelProvider implements
 			ITableLabelProvider {
+		CostItemsLabelProvider() {
+		}
 
-		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
 
-		@Override
 		public String getColumnText(Object element, int columnIndex) {
-			if (element instanceof CostProject) {
+			if ((element instanceof CostProject)) {
 				CostProject cp = (CostProject) element;
 				if (columnIndex == 0)
 					return cp.getProjectName();
-				else if (columnIndex == 1)
-					return cp.getCost() + "";
-				else if (columnIndex == 2)
+				if (columnIndex == 1)
+					return String.valueOf(cp.getCost());
+				if (columnIndex == 2) {
 					return cp.getRemark();
+				}
 			}
-
 			return null;
 		}
-
 	}
-
 }

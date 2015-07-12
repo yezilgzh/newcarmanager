@@ -1,61 +1,68 @@
 package car.manager;
 
+import java.util.MissingResourceException;
+
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.osgi.framework.BundleContext;
 
-/**
- * The activator class controls the plug-in life cycle
- */
+import car.manager.servlet.QuerUserRecordsServlet;
+import car.manager.servlet.QuerUsersServlet;
+
 public class Activator extends AbstractUIPlugin {
-
-	// The plug-in ID
-	public static final String PLUGIN_ID = "Test"; //$NON-NLS-1$
-
-	// The shared instance
+	public static final String PLUGIN_ID = "car.customer.manager";
 	private static Activator plugin;
-	
-	/**
-	 * The constructor
-	 */
-	public Activator() {
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		Server server = new Server(6969);
+		Context root = new Context(server, "/", 1);
+		root.addServlet(new ServletHolder(new QuerUsersServlet()),
+				"/web/carquery");
+		root.addServlet(new ServletHolder(new QuerUserRecordsServlet()),
+				"/web/userrecords");
+		server.start();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
 	}
 
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
 	public static Activator getDefault() {
 		return plugin;
 	}
 
-	/**
-	 * Returns an image descriptor for the image file at the given
-	 * plug-in relative path
-	 *
-	 * @param path the path
-	 * @return the image descriptor
-	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
-		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+		return imageDescriptorFromPlugin("car.customer.manager", path);
+	}
+
+	public static Image getImage(String path) {
+		if (path == null) {
+			return null;
+		}
+		return getImage(getDefault().getImageRegistry(), path.toString());
+	}
+
+	public static Image getImage(ImageRegistry registry, String imgname) {
+		try {
+			Image img = registry.get(imgname);
+			if (img == null) {
+				ImageDescriptor desc = imageDescriptorFromPlugin(
+						"car.customer.manager", imgname);
+				registry.put(imgname, desc);
+				img = registry.get(imgname);
+			}
+			return img;
+		} catch (MissingResourceException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
